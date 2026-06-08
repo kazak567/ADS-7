@@ -1,72 +1,71 @@
 // Copyright 2021 NNTU-CS
 #include "train.h"
 
-Train::Train() : moveCounter(0), startCompartment(nullptr) {}
+Train::Train() : countOp(0), first(nullptr) {}
 
 Train::~Train() {
-  if (!startCompartment) return;
+  if (first == nullptr) return;
 
-  Compartment* current = startCompartment;
+  Car *cursor = first;
   do {
-    Compartment* nextOne = current->forward;
-    delete current;
-    current = nextOne;
-  } while (current != startCompartment);
+    Car *follower = cursor->next;
+    delete cursor;
+    cursor = follower;
+  } while (cursor != first);
 }
 
-void Train::attachWagon(bool initialState) {
-  Compartment* newWagon = new Compartment{initialState, nullptr, nullptr};
+void Train::addCar(bool light) {
+  Car *wagon = new Car{light, nullptr, nullptr};
 
-  if (!startCompartment) {
-    startCompartment = newWagon;
-    startCompartment->forward = startCompartment;
-    startCompartment->backward = startCompartment;
+  if (first == nullptr) {
+    first = wagon;
+    first->next = first;
+    first->prev = first;
   } else {
-    Compartment* rear = startCompartment->backward;
-    rear->forward = newWagon;
-    newWagon->backward = rear;
-    newWagon->forward = startCompartment;
-    startCompartment->backward = newWagon;
+    Car *tail = first->prev;
+    tail->next = wagon;
+    wagon->prev = tail;
+    wagon->next = first;
+    first->prev = wagon;
   }
 }
 
-int Train::determineSize() {
-  if (!startCompartment) return 0;
+int Train::getLength() {
+  if (first == nullptr) return 0;
 
-  moveCounter = 0;
-  startCompartment->lampOn = true;
+  countOp = 0;
+  first->light = true;
 
-  int estimatedLength = 1;
-  Compartment* traveler = startCompartment->forward;
-  ++moveCounter;
+  int probe = 1;
+  Car *walker = first->next;
+  ++countOp;
 
   while (true) {
-    if (traveler->lampOn) {
-      traveler->lampOn = false;
+    if (walker->light) {
+      walker->light = false;
 
-      for (int step = 0; step < estimatedLength; ++step) {
-        traveler = traveler->backward;
-        ++moveCounter;
+      for (int step = 0; step < probe; ++step) {
+        walker = walker->prev;
+        ++countOp;
       }
 
-      if (!traveler->lampOn) {
-        // Restore the marker and finish
-        traveler->lampOn = true;
-        return estimatedLength;
+      if (!walker->light) {
+        walker->light = true;
+        return probe;
       }
 
-      for (int step = 0; step < estimatedLength; ++step) {
-        traveler = traveler->forward;
-        ++moveCounter;
+      for (int step = 0; step < probe; ++step) {
+        walker = walker->next;
+        ++countOp;
       }
     }
 
-    traveler = traveler->forward;
-    ++moveCounter;
-    ++estimatedLength;
+    walker = walker->next;
+    ++countOp;
+    ++probe;
   }
 }
 
-int Train::getMoveCount() {
-  return moveCounter;
+int Train::getOpCount() {
+  return countOp;
 }
