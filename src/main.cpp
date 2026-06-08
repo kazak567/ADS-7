@@ -3,21 +3,20 @@
 #include "train.h"
 
 int main() {
-  const int wagonCount = 6;
+  Train train;
 
-  Train circularTrain;
+  train.addCar(false);
+  train.addCar(true);
+  train.addCar(false);
+  train.addCar(false);
+  train.addCar(true);
+  train.addCar(false);
 
-  // Construct a train with a fixed pattern
-  bool pattern[] = {false, true, false, false, true, false};
-  for (int i = 0; i < wagonCount; ++i) {
-    circularTrain.attachWagon(pattern[i]);
-  }
+  int length = train.getLength();
+  int ops = train.getOpCount();
 
-  int computedLength = circularTrain.determineSize();
-  int totalMoves = circularTrain.getMoveCount();
-
-  std::cout << "Train length: " << computedLength << std::endl;
-  std::cout << "Number of steps: " << totalMoves << std::endl;
+  std::cout << "Train length: " << length << std::endl;
+  std::cout << "Number of steps: " << ops << std::endl;
 
   return 0;
 }
